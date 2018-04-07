@@ -43,11 +43,11 @@ elif args[1]=="xray":
 	s_cm = crossmatch(alldata, cat='all',cclass18=[])
 	#stern2005_3x2(alldata, selection=s_cm)
 	#labelx=r'$log(J/H)$'
-	#labely=r'$log(K_S/S_{3.6\mu m})$'
+	#labely=r'$log(K_S/f_{3.6\mu m})$'
 	#labelx=None
 	#labely=None
-	labelx=r'$log(S_{5.8\mu m}/S_{3.6\mu m})$'
-	labely=r'$log(S_{8.0\mu m}/S_{4.5\mu m})$'
+	labelx=r'$log(f_{5.8\mu m}/f_{3.6\mu m})$'
+	labely=r'$log(f_{8.0\mu m}/f_{4.5\mu m})$'
 	#s2 = lacy2007_1x1(alldata, selection=s_cm)
 	s2 = color_color_3x2(alldata, selection=s_cm, labelx=labelx, labely=labely)
 	exit(1)
@@ -80,7 +80,7 @@ elif args[1]=="split":
 	# Several catalog to choice from here:
 	#s_cm = crossmatch(cat='all',selection=s_smf_niragn)
 	print(Counter(s_smf[1]))
-	s_cm = crossmatch(alldata, cat='all',cclass18=[],selection=s_smf)
+	s_cm = crossmatch(alldata, cat='all',cclass22=[],selection=s_smf)
 	s_cm_xagn = [
 			[a for (a,b) in zip(s_cm[0],s_cm[1]) if b in mycolors_xagn],
 			[b for (a,b) in zip(s_cm[0],s_cm[1]) if b in mycolors_xagn]

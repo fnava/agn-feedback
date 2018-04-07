@@ -341,8 +341,8 @@ def lacy2007_1x1(alldata, kth=None, selection=None):
 	xmax = 1.0
 	plt.xlim(xmin=-0.6,xmax=xmax)
 	plt.ylim(ymin=-0.8,ymax=1.4)
-	plt.xlabel(r'$log(S_{5.8\mu m}/S_{3.6\mu m})$')
-	plt.ylabel(r'$log(S_{8.0\mu m}/S_{4.5\mu m})$')
+	plt.xlabel(r'$log(f_{5.8\mu m}/f_{3.6\mu m})$')
+	plt.ylabel(r'$log(f_{8.0\mu m}/f_{4.5\mu m})$')
 	# Original wedge
 	plt.plot([-0.1, -0.1], [-0.2,0.4], color='gray', linestyle='--', lw=2)
 	plt.plot([-0.1, 1.0], [-0.2,-0.2], color='gray', linestyle='--', lw=2)
@@ -552,6 +552,7 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 			{"z0":2.5, "z1":3.0, "ax":[1,2], "y0":0.49}
 			]	
 	centroids = []
+	do_centroids = True
 	for b in zbins:
 		ax = axis[b["ax"][0],b["ax"][1]]
 		x0 = [ i-j for (i,j,k,l,z) in zip(log_10,log_20,log_30,log_40,zpeak0) if 
@@ -559,16 +560,16 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 		y0 = [ k-l for (i,j,k,l,z) in zip(log_10,log_20,log_30,log_40,zpeak0) if
 				not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
 		ax.hist2d(x0, y0, bins=binres, cmap=plt.cm.Greys,zorder= 0)
-		x1 = [ i-j for (i,j,k,l,z) in zip(log_11,log_21,log_31,log_41,zpeak1) if 
-				not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
-		y1 = [ k-l for (i,j,k,l,z) in zip(log_11,log_21,log_31,log_41,zpeak1) if
-				not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
-		ax.scatter(x1, y1, marker='.', c='red', edgecolors="none", alpha=0.3, label="stars")
+		centroids.append((b["z0"], b["z1"], np.mean(x0), np.mean(y0)))
+		#x1 = [ i-j for (i,j,k,l,z) in zip(log_11,log_21,log_31,log_41,zpeak1) if 
+		#		not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
+		#y1 = [ k-l for (i,j,k,l,z) in zip(log_11,log_21,log_31,log_41,zpeak1) if
+		#		not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
+		#ax.scatter(x1, y1, marker='.', c='red', edgecolors="none", alpha=0.3, label="stars")
 		x = [ i-j for (i,j,k,l,z) in zip(log_10,log_20,log_30,log_40,zpeak0) if 
 				not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
 		y = [ k-l for (i,j,k,l,z) in zip(log_10,log_20,log_30,log_40,zpeak0) if
 				not np.isnan(i+j+k+l) and z >= b["z0"] and z < b["z1"]]
-		centroids.append((b["z0"], b["z1"], np.mean(x), np.mean(y)))
 		if selset1 is None:
 			for k in arrows.keys():
 				x = [ i for (i,j,z) in zip(l12,use,zpeak) if 
@@ -578,7 +579,7 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 				ax.scatter(x, y, marker=arrows[k], c='b', edgecolors="none", alpha=0.5, label="")
 				#ax.scatter(x, y, marker='.', c='b', edgecolors='none')
 		else:
-			for k in mycolors.keys():
+			for k in sorted(mycolors.keys()):
 				x = [ i for (i,j,z) in zip(l12,star,zpeak) if 
 						j == k  and z >= b["z0"] and z < b["z1"]]
 				y = [ i for (i,j,z) in zip(l34,star,zpeak) if 
@@ -603,7 +604,7 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 		ax.plot([0.08, 0.08], [0.15,0.3668], color='gray', linestyle='-', lw=2)
 		ax.plot([0.3471, xmax], [0.15,1.21*xmax-0.27], color='gray', linestyle='-', lw=2)
 		ax.plot([0.08, xmax], [0.3668,1.21*xmax+0.27], color='gray', linestyle='-', lw=2)
-	if False:
+	if do_centroids:
 		print(centroids)
 		for b in zbins:
 			ax = axis[b["ax"][0],b["ax"][1]]
@@ -612,7 +613,24 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 			bxx = [bx for (z0, z1, bx, by) in centroids if z0 == b["z0"]]
 			byy = [by for (z0, z1, bx, by) in centroids if z0 == b["z0"]]
 			ax.plot(bx, by, marker='o', c='red', linewidth=2, markersize=3)
-			ax.plot(bxx[0], byy[0], marker='*', c='red', linewidth=5, markersize=12)
+			ax.plot(bxx[0], byy[0], marker='*', c='red', linewidth=5, markersize=20)
+			# Revised wedge
+			if b["z0"] > 1.0:
+				ox = bxx[0] - bariadj_obsagn_ref1[0]
+				oy = byy[0] - bariadj_obsagn_ref1[1]
+				print(oy, 0.15+oy)
+				left_bar_size = (0.3668-0.15)
+				# lower horiz bar
+				if oy < left_bar_size:
+					ax.plot([0.08, 0.3471+oy/1.21], [0.15+oy,0.15+oy], color='red', linestyle='-', lw=2)
+				else:
+					ax.plot([0.08+(oy-left_bar_size)/1.21, 0.3471+oy/1.21], [0.15+oy,0.15+oy], color='red', linestyle='-', lw=2)
+				# left vert bar
+				#ax.plot([0.08, 0.08], [0.15,0.3668], color='red', linestyle='-', lw=2)
+				# lower diag bar
+				#ax.plot([0.3471+oy/1.21, xmax], [0.15+oy,1.21*xmax-0.27], color='red', linestyle='-', lw=2)
+				# upper diag bar
+				#ax.plot([0.08, xmax], [0.3668,1.21*xmax+0.27], color='red', linestyle='-', lw=2)
 	plt.show()
 	selection = [ i for (i,j) in zip(idx,use) if j == '.' ]
 	print("selection=%d" % len(selection))
@@ -635,7 +653,8 @@ def mass_selection(alldata, cndf, kth=None):
 			{
 				#"USE":lacy2007_func
 				#"USE":donley2012_func
-				"USE":donley2012_bariadj_func
+				#"USE":donley2012_bariadj_func
+				"USE":donley2012_baricut_func
 				},
 			["ch1","ch2","ch3","ch4","z_peak"])
 	[idx, lmass, zmass, zpeak, c1, c2, c3, c4, kstot, use] = zip(*r2)
@@ -997,7 +1016,7 @@ def uvj_3x2(alldata, kth=None, selection=None):
 		#	ax.scatter(xe, ye, c=l[1], edgecolors=l[2], marker=l[3]) #zorder=1.0)
 		#if selset1 is None:
 		#	ax.hist2d(x, y, bins=binres, cmap=plt.cm.Greys)
-		for k in mycolors.keys():
+		for k in sorted(mycolors.keys()):
 			xe = [i for (i,j) in zip(x,u) if j == k ]
 			ye = [i for (i,j) in zip(y,u) if j == k ]
 			if len(xe)>0:

@@ -21,11 +21,12 @@ from collections import Counter
 mycolors = {
 		'[AGN]'				: ["black",		"AGN",				's',"black"],
 		'[Xray AGN]'		: ["crimson",	"X-Ray-AGN",		'o',"crimson"],
-		#'[XMM]'				: ["magenta",	"XMM",				'^',"magenta"],
-		'[XMM]'				: ["green",	"XMM",				'^',"green"],
+		'[XMM]'				: ["magenta",	"XMM",				'^',"magenta"],
+		#'[XMM]'				: ["green",	"XMM",				'^',"green"],
 		'[Chandra Star]'	: ["grey",		"Chandra (Star)",	'o',"grey"],
 		'[Chandra BLAGN]'	: ["blue",		"Chandra (BLAGN)",	's',"blue"],
-		'[Chandra not-BLAGN]': ["orangered","Chandra (not-BLAGN)",'s',"orangered"],
+		#'[Chandra not-BLAGN]': ["orangered","Chandra (not-BLAGN)",'s',"orangered"],
+		'[Chandra not-BLAGN]': ["orange","Chandra (not-BLAGN)",'s',"orange"],
 		'[Chandra unobs]'	: ["blue",		"Chandra (Unobscured)",	's',"blue"],
 		'[Chandra obsc]'	: ["orangered",	"Chandra (Obscured)",'s',"orangered"],
 		'[Chandra galaxy]'	: ["grey",		"Chandra (Galaxy)"	,'o',"grey"],
@@ -239,6 +240,7 @@ bariadj_obsagn=[
 		(3.0, 10.0, 0.0, 0.0)	
 		]
 bariadj_obsagn_ref = (-0.12334819085155703, 0.09894967234429784)
+bariadj_obsagn_ref1 = (-0.07989849010137863, -0.07561034249145582) 
 
 
 bariadj_blagn=[
@@ -253,10 +255,41 @@ bariadj_blagn=[
 		]
 bariadj_blagn_ref = (-0.13185353031352148, -0.0671463347445458)
 
-bariadj = bariadj_obsagn
-bariadj_ref = bariadj_obsagn_ref
-bariadj = bariadj_blagn
-bariadj_ref = bariadj_blagn_ref
+bariadj_all=[
+		(0.0, 0.2, 0.0, 0.0),
+		(0.2, 0.5, -0.12334819085155703, 0.09894967234429784), 
+		(0.5, 1.0, -0.13185353031352148, -0.0671463347445458), 
+		(1.0, 1.5, -0.07989849010137863, -0.07561034249145582), 
+		(1.5, 2.0, 0.10125731448524965, -0.04382036450512951), 
+		(2.0, 2.5, 0.23099877403033042, 0.08357985231782124), 
+		(2.5, 3.0, 0.26954172677464505, 0.16298817160981743),
+		(3.0, 10.0, 0.0, 0.0)
+		]
+bariadj_all_ref1 = (-0.07989849010137863, -0.07561034249145582) 
+
+bariadj = bariadj_all
+bariadj_ref = bariadj_all_ref1
+#bariadj = bariadj_blagn
+#bariadj_ref = bariadj_blagn_ref
+
+def donley2012_baricut_func(flux, c1, c2, c3, c4, z):
+	adj = [(bariadj_ref[0]-x, bariadj_ref[1]-y) 
+		for (z0, z1, x, y) 
+		in bariadj if z > z0 and z <= z1]
+	x = np.log10(c3/c1) #log_58 - log_36
+	y = np.log10(c4/c2) #log_80 - log_45
+	if z >= 1.0:
+		oy = -adj[0][1]
+	else:
+		oy = 0.0
+	if (x >= 0.08 and 
+			y >= 0.15+oy and
+			y <= 1.21*x + 0.27 and
+			y >= 1.21*x - 0.27 and
+			c2 > c1 and c3 > c2 and c4 > c3):
+		return color(1) 
+	else:
+		return color(0)
 
 def donley2012_bariadj_func(flux, c1, c2, c3, c4, z):
 	adj = [(bariadj_ref[0]-x, bariadj_ref[1]-y) 
