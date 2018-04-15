@@ -266,11 +266,14 @@ def lacy2007_1x1(alldata, kth=None, selection=None):
 			#"ch3":pos,
 			#"ch4":pos,
 			"USE":is1,
-			#"Ks_tot": lambda k: kscut2(k, th=kth)
-			#"Ks_tot": lambda k: kscut2(k, th=kth)
+			#"Ks_tot": lambda k: kscut(k, th=kth)
 			}
 	r1 = FilterByConds(fields, data, conds)
-	r2 = FilterByFuncs(fields, r1, 
+	r2 = FilterByConds(fields, r1,
+			{"Ks": lambda f, ks, kstot: kscut2(f, ks, kstot, th=kth)},
+			["Ks","Ks_tot"]
+			)
+	r3 = FilterByFuncs(fields, r2, 
 			{
 				"ch1":uplog1b,
 				"ch2":uplog2b,
@@ -283,15 +286,15 @@ def lacy2007_1x1(alldata, kth=None, selection=None):
 				#"z_spec":lambda f,ks,kst,c1,e1,c2,e2,c3,e3,c4,e4: color(f)
 				}, 
 			["Ks","Ks_tot","ch1","ech1","ch2","ech2","ch3","ech3","ch4","ech4"])
-	r31 = FilterByConds(fields, r2, 
+	r31 = FilterByConds(fields, r3, 
 			{
 				"USE":upsncut
 				},
 			["ech1","ech2","ech3","ech4"])
 	r32 = FilterByConds(fields, r31, 
 			{
-				#"USE":donley2012_cond
-				"USE":lacy2007_cond
+				"USE":donley2012_cond
+				#"USE":lacy2007_cond
 				},
 			["ch1","ch2","ch3","ch4"])
 	[idxw,log_36,e1,log_45,e2,log_58,e3,log_80,e4,use,star,ks,ks_tot] = zip(*r32)
@@ -330,19 +333,20 @@ def lacy2007_1x1(alldata, kth=None, selection=None):
 			#plt.scatter(x, y, marker=arrows[k], c='b', edgecolors="none")
 			plt.scatter(x, y, marker='.', c='b', edgecolors='none')
 	else:
-		for k in mycolors.keys():
+		for k in sorted(mycolors.keys()):
 			x = [ i for (i,j) in zip(l58_36,star) if j == k ]
 			y = [ i for (i,j) in zip(l80_45,star) if j == k ]
 			if len(x) > 0:
 				plt.scatter(x, y, marker=mycolors[k][2], c=mycolors[k][0], edgecolors='none', label=mycolors[k][1])
+				#plt.scatter(x, y, marker=mycolors[k][2], c=mycolors[k][0], edgecolors='none', label=mycolors[k][1])
 		legend = plt.legend(loc='upper right', shadow=True)
 		#plt.title(r'$K_{S_{tot}}\,<\,%.1f\,\,N_{tot}\,=\,%d\,\,N_{sel}\,=\,%d$' % (kth, ntot, nsel))
 		#plt.title(r'$N_{tot}\,=\,%d\,\,N_{sel}\,=\,%d$' % (ntot, nsel))
 	xmax = 1.0
 	plt.xlim(xmin=-0.6,xmax=xmax)
 	plt.ylim(ymin=-0.8,ymax=1.4)
-	plt.xlabel(r'$log(f_{5.8\mu m}/f_{3.6\mu m})$')
-	plt.ylabel(r'$log(f_{8.0\mu m}/f_{4.5\mu m})$')
+	plt.xlabel(r'$log(f_{5.8\mu m}/f_{3.6\mu m})$', fontsize="x-large")
+	plt.ylabel(r'$log(f_{8.0\mu m}/f_{4.5\mu m})$', fontsize="x-large")
 	# Original wedge
 	plt.plot([-0.1, -0.1], [-0.2,0.4], color='gray', linestyle='--', lw=2)
 	plt.plot([-0.1, 1.0], [-0.2,-0.2], color='gray', linestyle='--', lw=2)
@@ -591,8 +595,8 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 		ax.axis([xmin,xmax,ymin,ymax])
 		#ax.set_aspect("equal")
 		legend = ax.legend(loc='lower right', fontsize='small', shadow=True)
-		ax.set_xlabel(labelx)
-		ax.set_ylabel(labely)
+		ax.set_xlabel(labelx, fontsize="large")
+		ax.set_ylabel(labely, fontsize="large")
 		# Original wedge
 		ax.plot([-0.1, -0.1], [-0.2,0.4], color='gray', linestyle='--', lw=2)
 		ax.plot([-0.1, 1.0], [-0.2,-0.2], color='gray', linestyle='--', lw=2)
@@ -612,8 +616,8 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 			by = [by for (z0, z1,bx, by) in centroids ]
 			bxx = [bx for (z0, z1, bx, by) in centroids if z0 == b["z0"]]
 			byy = [by for (z0, z1, bx, by) in centroids if z0 == b["z0"]]
-			ax.plot(bx, by, marker='o', c='red', linewidth=2, markersize=3)
-			ax.plot(bxx[0], byy[0], marker='*', c='red', linewidth=5, markersize=20)
+			#ax.plot(bx, by, marker='o', c='red', linewidth=2, markersize=3)
+			#ax.plot(bxx[0], byy[0], marker='*', c='red', linewidth=5, markersize=20)
 			# Revised wedge
 			if b["z0"] > 1.0:
 				ox = bxx[0] - bariadj_obsagn_ref1[0]
@@ -740,8 +744,8 @@ def mass_selection(alldata, cndf, kth=None):
 	#ax.axis([9.75,11.75,0.1*int(cz3),10*int(cz3)])
 	ax.plot([9.75,11.75], [cz3,cz3], color='darkgray', linestyle='--', lw=2)
 	#ax.plot([Mz3,Mz3], [0.1*int(cz3),10*int(cz3)], color='darkgray', linestyle='--', lw=2)
-	ax.set_xlabel(r'$\log(M_\star\,/\,M_\odot)$')
-	ax.set_ylabel(r'$log\,n(> M_\star)\,[\mathrm{Mpc}^{-3}]$')
+	ax.set_xlabel(r'$\log(M_\star\,/\,M_\odot)$',fontsize="large")
+	ax.set_ylabel(r'$log\,n(> M_\star)\,[\mathrm{Mpc}^{-3}]$',fontsize="large")
 	ax.set_xlim(9.7, 11.7)
 	ax.set_ylim(-5.5, -2.9)
 
@@ -756,7 +760,7 @@ def mass_selection(alldata, cndf, kth=None):
 		cz = csmf[b][int((Mz-binmin)/binstep)]
 		czu = csmf_u[b][int((Mz-binmin)/binstep)]
 		ax.plot(Mz, cz, 'k^')
-		ax.annotate(r'$n=%d$' % czu, xy=(Mz,cz), xytext=(Mz*(1+0.01*((-1)**b)), cz*(1-0.15*((-1)**b))), arrowprops=dict(facecolor='black', arrowstyle='->'))
+		ax.annotate(r'$n=%d$' % czu, xy=(Mz,cz), xytext=(Mz*(1+0.01*((-1)**b)), cz*(1-0.15*((-1)**b))), arrowprops=dict(facecolor='black', arrowstyle='->'),fontsize="large")
 		print("[%.1f:%.1f): Mz=%.2f, N=%d" % (zbins[b]["z0"],zbins[b]["z1"], Mz, czu), end="")
 		sel = [i for (i,m,z) in zip(idx, lmass, zpeak) if 
 				z >= zbins[b]["z0"] and z < zbins[b]["z1"] and m >= Mz ]
