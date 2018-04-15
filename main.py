@@ -18,7 +18,7 @@ elif args[1]=="stern2005_1x1":
 elif args[1]=="stern2005_3x2":
 	stern2005_3x2(alldata)
 elif args[1]=="lacy2007_1x1":
-	s = lacy2007_1x1(alldata, kth=23.4)
+	s = lacy2007_1x1(alldata, kth=21.0)
 	#uvj_3x2(kth=21.0,selection=s)
 	#plot_fracs(kth=21.0,selection=s)
 elif args[1]=="color_color_1x1":
@@ -40,7 +40,7 @@ elif args[1]=="smf":
 elif args[1]=="xray":
 	#s_cm = cm('all')
 	#exit(1)
-	s_cm = crossmatch(alldata, cat='all',cclass18=[])
+	s_cm = crossmatch(alldata, cat='all',cclass22=[])
 	#stern2005_3x2(alldata, selection=s_cm)
 	#labelx=r'$log(J/H)$'
 	#labely=r'$log(K_S/f_{3.6\mu m})$'
@@ -48,7 +48,7 @@ elif args[1]=="xray":
 	#labely=None
 	labelx=r'$log(f_{5.8\mu m}/f_{3.6\mu m})$'
 	labely=r'$log(f_{8.0\mu m}/f_{4.5\mu m})$'
-	#s2 = lacy2007_1x1(alldata, selection=s_cm)
+	s2 = lacy2007_1x1(alldata, selection=s_cm)
 	s2 = color_color_3x2(alldata, selection=s_cm, labelx=labelx, labely=labely)
 	exit(1)
 	s_cm = crossmatch(alldata, cat='xmm')
@@ -98,8 +98,8 @@ elif args[1]=="split":
 	print('len(s_cm_not_agn)=%d' % len(s_cm_not_agn[0]))
 	#s_tot = [list(s_smf_iragn[0]) + list(s_cm[0]), list(s_smf_iragn[1]) + list(s_cm[1])]
 	s_tot = [list(s_cm[0]), list(s_cm[1])]
-	labelx=r'$log(S_{5.8\mu m}/S_{3.6\mu m})$'
-	labely=r'$log(S_{8.0\mu m}/S_{4.5\mu m})$'
+	labelx=r'$log(f_{5.8\mu m}/f_{3.6\mu m})$'
+	labely=r'$log(f_{8.0\mu m}/f_{4.5\mu m})$'
 	s2 = color_color_3x2(alldata, selection=s_tot, labelx=labelx, labely=labely)
 	plot_fracs(alldata, selection=s_tot)
 	uvj_3x2(alldata, selection=s_tot)

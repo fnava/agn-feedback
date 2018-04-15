@@ -29,7 +29,7 @@ mycolors = {
 		'[Chandra not-BLAGN]': ["orange","Chandra (not-BLAGN)",'s',"orange"],
 		'[Chandra unobs]'	: ["blue",		"Chandra (Unobscured)",	's',"blue"],
 		'[Chandra obsc]'	: ["orangered",	"Chandra (Obscured)",'s',"orangered"],
-		'[Chandra galaxy]'	: ["grey",		"Chandra (Galaxy)"	,'o',"grey"],
+		'[Chandra galaxy]'	: ["cyan",		"Chandra (Galaxy)"	,'o',"cyan"],
 		'[IR-AGN]'			: ["green",		"IR-AGN",			'x',"green"],
 		#'[IR-AGN]'			: ["gold",		"IR-AGN", 'x',"gold"],
 		'[not IR-AGN]'		: ["brown",		"Not AGN",		'.',"none"],
@@ -655,7 +655,7 @@ def crossmatch(alldata, kth=None, cat='all', cclass18=None, cclass22=None, selec
 	if not selset1:
 		ax = plt.axes()
 		nbins = 20
-		for k in mycolors.keys():
+		for k in sorted(mycolors.keys()):
 		#for k in mycolors_xagn:
 			x = [ 3600*d for (d,s,c) in zip(dists,selection,colors) if c == k]
 			if len(x)>0:
