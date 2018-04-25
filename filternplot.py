@@ -645,7 +645,8 @@ def color_color_3x2(alldata, kth=None, selection=None, labelx=None, labely=None)
 def mass_selection(alldata, cndf, kth=None):
 	print("mass selection")
 	plotit = True
-	fields, data = FilterByFields(alldata, "id","lmass","z_mass","z_peak","ch1","ch2","ch3","ch4","Ks_tot","USE")
+	fields, data = FilterByFields(alldata, "id","lmass","z_mass","z_peak","ch1","ech1","ch2","ech2","ch3","ech3","ch4","ech4","Ks","Ks_tot","USE")
+	#fields, data = FilterByFields(alldata, "id","lmass","z_mass","z_peak","ch1","ch2","ch3","ch4","Ks","Ks_tot","USE")
 	conds = { 
 			"Ks_tot": lambda k: kscut(k, th=kth),
 			"lmass":pos,
@@ -653,7 +654,19 @@ def mass_selection(alldata, cndf, kth=None):
 			"USE":is1
 			}
 	r1 = FilterByConds(fields, data, conds)
-	r2 = FilterByFuncs(fields, r1, 
+	r21 = FilterByFuncs(fields, r1, 
+			{
+				"ch1":uplog1b,
+				"ch2":uplog2b,
+				"ch3":uplog3b,
+				"ch4":uplog4b,
+				"ech1":upsn1,
+				"ech2":upsn2,
+				"ech3":upsn3,
+				"ech4":upsn4,
+				}, 
+			["Ks","Ks_tot","ch1","ech1","ch2","ech2","ch3","ech3","ch4","ech4"])
+	r2 = FilterByFuncs(fields, r21, 
 			{
 				#"USE":lacy2007_func
 				#"USE":donley2012_func
@@ -661,7 +674,7 @@ def mass_selection(alldata, cndf, kth=None):
 				"USE":donley2012_baricut_func
 				},
 			["ch1","ch2","ch3","ch4","z_peak"])
-	[idx, lmass, zmass, zpeak, c1, c2, c3, c4, kstot, use] = zip(*r2)
+	[idx, lmass, zmass, zpeak, c1, e1, c2, e2, c3, e3, c4, e4, ks, kstot, use] = zip(*r2)
 
 	(xmin, ymin) = (0.0, 0.0)
 	(xmax, ymax) = (2.5, 2.5)
@@ -871,6 +884,7 @@ def plot_fracs(alldata, kth=None, selection=None):
 	[idx2, flux_u1,flux_v1,flux_v2,flux_j2,zspec2,kstot,star2,use2] = zip(*r4)
 	
 	print("len(idx1) = %d, len(idx2) = %d"  % (len(idx1), len(idx2)) )
+	#zlist = [(0.2,0.5),(0.5,1.0),(1.0,1.5),(1.5,2.0),(2.0,2.5),(2.5,3.0)]
 	zlist = [(0.2,0.5),(0.5,1.0),(1.0,1.5),(1.5,2.0),(2.0,2.5),(2.5,3.0),(3.0,4.0)]
 
 	fracs_agn = []
@@ -1030,7 +1044,8 @@ def uvj_3x2(alldata, kth=None, selection=None):
 		ax.axis([xmin,xmax,ymin,ymax])
 		legend = ax.legend(loc='lower right', fontsize='small', shadow=True)
 		ax.set_aspect("equal")
-		ax.set_title(r'$%.1f\leq z<%.1f\,\,N=%d$' % (b["z0"],b["z1"],len(x)))
+		if selset1 is None:
+			ax.set_title(r'$%.1f\leq z<%.1f\,\,N=%d$' % (b["z0"],b["z1"],len(x)))
 		ax.set_xlabel(r'$V-J_{rest}$')
 		ax.set_ylabel(r'$U-V_{rest}$')
 	plt.show()

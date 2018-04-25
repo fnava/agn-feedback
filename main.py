@@ -102,5 +102,10 @@ elif args[1]=="split":
 	labely=r'$log(f_{8.0\mu m}/f_{4.5\mu m})$'
 	s2 = color_color_3x2(alldata, selection=s_tot, labelx=labelx, labely=labely)
 	plot_fracs(alldata, selection=s_tot)
+	def xray(c):
+		if c in mycolors_xagn: return '[Xray AGN]'
+		else: return c
+	s_cmn = [xray(k) for k in s_cm[1]]
+	s_tot = [list(s_cm[0]), list(s_cmn)]
 	uvj_3x2(alldata, selection=s_tot)
 

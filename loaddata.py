@@ -32,7 +32,8 @@ mycolors = {
 		'[Chandra galaxy]'	: ["cyan",		"Chandra (Galaxy)"	,'o',"cyan"],
 		'[IR-AGN]'			: ["green",		"IR-AGN",			'x',"green"],
 		#'[IR-AGN]'			: ["gold",		"IR-AGN", 'x',"gold"],
-		'[not IR-AGN]'		: ["brown",		"Not AGN",		'.',"none"],
+		'[not IR-AGN]'		: ["maroon",	"Not AGN",			'.',"none"],
+		'[exc IR-AGN]'		: ["turquoise",	"Excluded IR-AGN",	'+',"none"],
 		'[not AGN]'			: ["mediumblue","Not AGN",			'.',"none"]
 		}
 mycolors_xagn = ['[XMM]', '[Chandra BLAGN]', '[Chandra not-BLAGN]', '[Chandra obsc]', '[Chandra unobs]']
@@ -206,8 +207,10 @@ def lacy2007_cond(flux, c1, c2, c3, c4):
 def donley2012_func(flux, c1, c2, c3, c4, z):
 	# z is not used, but included to allow the bariadj variation below
 	# and avoid touching too much the call to FilterByFunc
-	x = np.log10(c3/c1) #log_58 - log_36
-	y = np.log10(c4/c2) #log_80 - log_45
+	#x = np.log10(c3/c1) #log_58 - log_36
+	#y = np.log10(c4/c2) #log_80 - log_45
+	x = c3 - c1
+	y = c4 - c2
 	if (x >= 0.08 and 
 			y >= 0.15 and
 			y <= 1.21*x + 0.27 and
@@ -276,8 +279,10 @@ def donley2012_baricut_func(flux, c1, c2, c3, c4, z):
 	adj = [(bariadj_ref[0]-x, bariadj_ref[1]-y) 
 		for (z0, z1, x, y) 
 		in bariadj if z > z0 and z <= z1]
-	x = np.log10(c3/c1) #log_58 - log_36
-	y = np.log10(c4/c2) #log_80 - log_45
+	#x = np.log10(c3/c1) #log_58 - log_36
+	#y = np.log10(c4/c2) #log_80 - log_45
+	x = c3 - c1
+	y = c4 - c2
 	if z >= 1.0:
 		oy = -adj[0][1]
 	else:
@@ -287,9 +292,16 @@ def donley2012_baricut_func(flux, c1, c2, c3, c4, z):
 			y <= 1.21*x + 0.27 and
 			y >= 1.21*x - 0.27 and
 			c2 > c1 and c3 > c2 and c4 > c3):
-		return color(1) 
+		return '[IR-AGN]'
+	elif (x >= 0.08 and 
+			y < 0.15+oy and
+			y >= 0.15 and
+			y <= 1.21*x + 0.27 and
+			y >= 1.21*x - 0.27 and
+			c2 > c1 and c3 > c2 and c4 > c3):
+		return '[exc IR-AGN]'
 	else:
-		return color(0)
+		return '[not IR-AGN]'
 
 def donley2012_bariadj_func(flux, c1, c2, c3, c4, z):
 	adj = [(bariadj_ref[0]-x, bariadj_ref[1]-y) 
@@ -302,9 +314,9 @@ def donley2012_bariadj_func(flux, c1, c2, c3, c4, z):
 			y <= 1.21*x + 0.27 and
 			y >= 1.21*x - 0.27 and
 			c2 > c1 and c3 > c2 and c4 > c3):
-		return color(1) 
+		return '[IR-AGN]'
 	else:
-		return color(0)
+		return '[not IR-AGN]'
 
 def uplogb(flux, ks, ks_tot):
 	#return 25-2.5*np.log10(flux*ks_tot/ks)
@@ -455,7 +467,7 @@ def plotsteps(plotlist = [], labelx = "", labely = ""):
 	fig, ax = plt.subplots()
 	for (x1, x2, r, n1s, nts, c, offset, e) in plotlist:
 		rmax = 0.0
-		for i in range(0, len(n1s)):
+		for i in range(0, len(n1s)-1):
 			rmax = r[i] if r[i]>rmax else rmax
 		ax.plot([*x1,x2[-1]],[*r,r[-1]], c=c[0], drawstyle='steps-post', label=e[0])
 		x3 = [o+(i+j)/2 for (i,j,o) in zip(x1, x2, offset)]
@@ -463,9 +475,21 @@ def plotsteps(plotlist = [], labelx = "", labely = ""):
 		print(*x1)
 		print(*x2)
 		(y, p2u, p2l, p2u_lim, p2l_lim) = errbars(r, n1s, nts)
-		ax.errorbar(x3, r, yerr=[p2l, p2u], uplims=p2u_lim, lolims=p2l_lim, ecolor=c[0], fmt='none')
+		#ax.errorbar(x3, r, yerr=[p2l, p2u], uplims=p2u_lim, lolims=p2l_lim, ecolor=c[0], fmt='none')
+		ax.errorbar(x3, r, yerr=[p2l, p2u], ecolor=c[0], fmt='none')
+		x4  = [(i+j)/2+o for (i,j,o, k,l) in zip(x1, x2, offset, p2l_lim, p2u) if k]
+		p2u = [l for (i,j,k,l) in zip(x1, x2, p2l_lim, p2u) if k]
+		ax.errorbar(x4, p2u, yerr=p2u, uplims=True, ecolor=c[0], fmt='none')
+		x4  = [(i+j)/2+o for (i,j,o, k,l) in zip(x1, x2, offset, p2u_lim, p2l) if k]
+		p2l = [l for (i,j,k,l) in zip(x1, x2, p2u_lim, p2l) if k]
+		ax.errorbar(x4, p2l, yerr=p2l, lolims=True, ecolor=c[0], fmt='none')
 	legend = ax.legend(loc='upper right', shadow=True)
-	ax.axis([0.2,3.0,0.0,rmax*1.6])
+	ax.set_xlim(0.2,3.0)
+	print("rmax=%f" % rmax)
+	#ax.set_ylim(0.0,rmax*1.2)
+	ax.set_ylim(0.0,1.19)
+	#ax.set_ylim(0.0,rmax+0.1)
+	#ax.axis([0.2,3.0,0.0,rmax*1.1])
 	ax.set_xlabel(r'$%s$' % labelx)
 	ax.set_ylabel(r'$%s$' % labely)
 	plt.show()
