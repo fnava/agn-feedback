@@ -5,6 +5,21 @@
 This is a Jupyter notebook which explains the usage of the defined functions and give examples of how to use it to build plots with the catalog data, like the following one:
 
 ```python
+from loaddata import *
+from filternplot import *
+alldata, cndf = LoadTables()
+(f1,f2,f3) = ("L153_uv","L155_uv","lmass")
+fields, data = FilterByFields(alldata, "id",f1,f2,f3,"USE","star","Ks","Ks_tot")
+def is1(x): return x == 1
+r1 = FilterByConds(fields, data, { "USE":is1 })
+r2 = FilterByFuncs(fields, r1, 
+    {
+        f1:lambda f, ks, kstot: -2.5*np.log10(f*kstot/ks),
+        f2:lambda f, ks, kstot: -2.5*np.log10(f*kstot/ks)
+    }, ["Ks","Ks_tot"])
+[idx,u,v,mass,use,star,ks,ks_tot] = zip(*r2)
+x = [ k for (i,j,k) in zip(u,v,mass) if not np.isnan(i+j+k)]
+y = [ i-j for (i,j,k) in zip(u,v,mass) if not np.isnan(i+j+k)]
 binres = (100, 100)
 (xmin, xmax, ymin, ymax) = (8, 12, min(y), max(y))
 plt.hist2d(x, y, bins=binres, cmap=plt.cm.Greys,zorder= 0)
@@ -15,14 +30,11 @@ plt.xlabel('%s' % (f3))
 plt.show()
 ```
 
-
 ![png](output_15_0.png)
-
 
 Which shows the classical color bimodality present in the galaxy sample of the UltraVISTA catalog.
 
 ## Usage of the script.
-
 
 As part of the results of this work are two Python3 modules which contain the functions developped for the analysis and representation of data:
  * ```loaddata``` module, containing the auxiliary functions to retrieve, filter and transform data.
