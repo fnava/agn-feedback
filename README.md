@@ -1,4 +1,4 @@
-# Did AGNs supressed start formation in massive galaxies?
+# Did AGNs supress the star formation of massive galaxies?
 
 ## Jupyter and Python for the data analysis
 
